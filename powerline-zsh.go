@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"hash/fnv"
-	"math"
 	"os"
 	"os/exec"
 	"regexp"
@@ -36,51 +35,23 @@ const (
 	VIRTUAL_ENV_FG = 22
 )
 
-func nearestCubeLevel(v float64) int {
-	levels := [6]float64{0, 95.0 / 255, 135.0 / 255, 175.0 / 255, 215.0 / 255, 1.0}
-	best := 0
-	bestDist := math.Abs(v - levels[0])
-	for i := 1; i < 6; i++ {
-		if d := math.Abs(v - levels[i]); d < bestDist {
-			bestDist = d
-			best = i
-		}
-	}
-	return best
-}
-
-func hslToRGB(h, s, l float64) (float64, float64, float64) {
-	c := (1 - math.Abs(2*l-1)) * s
-	x := c * (1 - math.Abs(math.Mod(h/60, 2)-1))
-	m := l - c/2
-	var r, g, b float64
-	switch {
-	case h < 60:
-		r, g, b = c, x, 0
-	case h < 120:
-		r, g, b = x, c, 0
-	case h < 180:
-		r, g, b = 0, c, x
-	case h < 240:
-		r, g, b = 0, x, c
-	case h < 300:
-		r, g, b = x, 0, c
-	default:
-		r, g, b = c, 0, x
-	}
-	return r + m, g + m, b + m
-}
-
 func hostnameColor() int {
+	// Hand-verified 256-color indices: all have contrast ratio ≥ 4.5:1 against white.
+	palette := []int{
+		17, 18, 19, 21,      // navy → bright blue
+		22, 23, 24, 28,      // dark green → teal
+		52, 88, 124,         // maroon → red
+		53, 55, 56, 90, 91,  // magenta → violet
+		58, 94, 130,         // olive → burnt orange
+		161,                 // hot pink
+	}
 	host, _ := os.Hostname()
 	if idx := strings.Index(host, "."); idx != -1 {
 		host = host[:idx]
 	}
 	h := fnv.New32a()
 	h.Write([]byte(host))
-	hue := float64(h.Sum32() % 360)
-	r, g, b := hslToRGB(hue, 1.0, 0.20)
-	return 16 + 36*nearestCubeLevel(r) + 6*nearestCubeLevel(g) + nearestCubeLevel(b)
+	return palette[h.Sum32()%uint32(len(palette))]
 }
 
 type symbolSet struct {
