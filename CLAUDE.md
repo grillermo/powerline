@@ -13,9 +13,7 @@ No tests exist. No linting configured.
 
 ## Architecture
 
-Powerline-style zsh prompt generator. Two implementations:
-- `powerline-zsh.go` — Go implementation, the main one
-- `powerline-zsh.py` — original Python implementation (for reference only, ignore it)
+Powerline-style zsh prompt generator, implemented in `powerline-zsh.go`.
 
 ### How it works
 
