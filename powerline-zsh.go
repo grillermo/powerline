@@ -50,9 +50,6 @@ func hostnameColor() int {
 	if idx := strings.Index(host, "."); idx != -1 {
 		host = host[:idx]
 	}
-	if len(host) > 5 {
-		host = host[:5]
-	}
 	h := fnv.New32a()
 	h.Write([]byte(host))
 	return palette[h.Sum32()%uint32(len(palette))]
