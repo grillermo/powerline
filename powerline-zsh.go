@@ -6,6 +6,7 @@ import (
 	"hash/fnv"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -267,7 +268,28 @@ func getGitStatus() (hasPendingCommits, hasUntracked bool, originPosition string
 	return
 }
 
-func addGitSegment(p *Powerline) bool {
+// branchDupesPath reports whether the trailing components of cwd are exactly the
+// slash-separated components of branch — the case of a worktree checked out at a
+// path named after its own branch, e.g. ~/c/grillermo/sc-35457/dc-fix on branch
+// grillermo/sc-35457/dc-fix.
+func branchDupesPath(branch, cwd string) bool {
+	if branch == "" {
+		return false
+	}
+	parts := strings.Split(branch, "/")
+	dirs := strings.Split(filepath.ToSlash(strings.TrimRight(cwd, "/")), "/")
+	if len(parts) > len(dirs) {
+		return false
+	}
+	for i, part := range parts {
+		if part != dirs[len(dirs)-len(parts)+i] {
+			return false
+		}
+	}
+	return true
+}
+
+func addGitSegment(p *Powerline, cwd string) bool {
 	out, err := exec.Command("git", "symbolic-ref", "-q", "HEAD").Output()
 	if err != nil {
 		// Check if it's "not a git repo" vs detached HEAD
@@ -288,6 +310,12 @@ func addGitSegment(p *Powerline) bool {
 		branch = strings.TrimPrefix(ref, "refs/heads/")
 	} else {
 		branch = "(Detached)"
+	}
+
+	if branchDupesPath(branch, cwd) {
+		// The path already spells out the branch; keep the segment (its color
+		// carries the clean/dirty state) but drop the redundant name.
+		branch = "⎇"
 	}
 
 	hasPendingCommits, hasUntracked, originPosition := getGitStatus()
@@ -344,7 +372,7 @@ func addSvnSegment(p *Powerline, cwd string) bool {
 
 func addRepoSegment(p *Powerline, cwd string) {
 	for _, fn := range []func() bool{
-		func() bool { return addGitSegment(p) },
+		func() bool { return addGitSegment(p, cwd) },
 		func() bool { return addSvnSegment(p, cwd) },
 		func() bool { return addHgSegment(p) },
 	} {
