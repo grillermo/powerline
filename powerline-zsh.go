@@ -36,7 +36,14 @@ const (
 	VIRTUAL_ENV_FG = 22
 )
 
+// hostColor is set at build time (see build.sh / HOSTNAME_COLOR in .env)
+// to pin the hostname segment bg instead of deriving it from the hostname.
+var hostColor string
+
 func hostnameColor() int {
+	if n, err := strconv.Atoi(hostColor); err == nil && n >= 0 && n <= 255 {
+		return n
+	}
 	// Hand-verified 256-color indices: all have contrast ratio ≥ 4.5:1 against white.
 	palette := []int{
 		17, 18, 19, 21,      // navy → bright blue

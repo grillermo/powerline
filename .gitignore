@@ -4,3 +4,6 @@
 # Build artifact: arch-specific, so each machine builds its own.
 # A committed binary cannot serve both arm64 and Intel hosts.
 powerline-zsh
+
+# Local build config
+.env

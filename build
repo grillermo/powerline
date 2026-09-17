@@ -1,0 +1,11 @@
+#!/bin/sh
+# Pick the hostname segment color interactively, then build powerline-zsh with it.
+set -e
+cd "$(dirname "$0")"
+color=$(cd colorpicker && go run .)
+if [ -z "$color" ]; then
+	echo "No color picked; not building." >&2
+	exit 1
+fi
+HOSTNAME_COLOR=$color ./build.sh
+echo "Built ./powerline-zsh with hostname color $color"

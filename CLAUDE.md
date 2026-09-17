@@ -5,9 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build
 
 ```bash
-go build -o powerline-zsh powerline-zsh.go
+./build      # interactive: pick the hostname color, then build
+./build.sh   # non-interactive: uses HOSTNAME_COLOR from env/.env
 # Binary: ./powerline-zsh
 ```
+
+`./build` runs `colorpicker/` (a separate Go module using the chicle TUI library via `replace => ../../chicle`, so `~/c/chicle` must exist) and passes the picked color to `build.sh`. Its palette duplicates the one in `hostnameColor()`; keep them in sync. The prompt binary itself does not depend on chicle.
+
+`build.sh` sources `.env` (gitignored; see `.env.example`) unless `HOSTNAME_COLOR` is already set in the environment, and passes it via `-ldflags -X main.hostColor=...`.
 
 No tests exist. No linting configured.
 
@@ -39,4 +44,4 @@ Uses Go's `flag` package, so flags must precede the positional argument.
 
 ### Color constants
 
-All colors are 256-color terminal indices defined at the top of `powerline-zsh.go`. Clean/dirty repo states use different bg colors (148 green vs 161 red). `hostnameColor()` picks the hostname segment bg from a curated palette by hashing the first 5 chars of the short hostname.
+All colors are 256-color terminal indices defined at the top of `powerline-zsh.go`. Clean/dirty repo states use different bg colors (148 green vs 161 red). `hostnameColor()` picks the hostname segment bg from a curated palette by hashing the short hostname, unless `HOSTNAME_COLOR` (0-255) was baked in at build time.
