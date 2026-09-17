@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `./build` runs `colorpicker/` (a separate Go module using the chicle TUI library via `replace => ../../chicle`, so `~/c/chicle` must exist) and passes the picked color to `build.sh`. Its palette duplicates the one in `hostnameColor()`; keep them in sync. The prompt binary itself does not depend on chicle.
 
+`colorpicker` prints `<index> <#rrggbb>`; after a successful build, `./build` records both in `color.env` (gitignored) so other tools can read the color that was baked in. `color.env` is a record only — nothing reads it back.
+
 `build.sh` sources `.env` (gitignored; see `.env.example`) unless `HOSTNAME_COLOR` is already set in the environment, and passes it via `-ldflags -X main.hostColor=...`.
 
 No tests exist. No linting configured.

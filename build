@@ -1,11 +1,19 @@
 #!/bin/sh
 # Pick the hostname segment color interactively, then build powerline-zsh with it.
+# The pick is recorded in color.env (256 index plus hex) for other tools to read.
 set -e
 cd "$(dirname "$0")"
-color=$(cd colorpicker && go run .)
+picked=$(cd colorpicker && go run .)
+color=${picked%% *}
+hex=${picked#* }
 if [ -z "$color" ]; then
 	echo "No color picked; not building." >&2
 	exit 1
 fi
 HOSTNAME_COLOR=$color ./build.sh
-echo "Built ./powerline-zsh with hostname color $color"
+cat >color.env <<EOF
+# Written by ./build. The hostname segment color that was last built in.
+HOSTNAME_COLOR=$color
+HOSTNAME_COLOR_HEX=$hex
+EOF
+echo "Built ./powerline-zsh with hostname color $color ($hex); recorded in color.env"

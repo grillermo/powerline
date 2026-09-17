@@ -7,3 +7,6 @@ powerline-zsh
 
 # Local build config
 .env
+
+# Recorded color pick
+color.env
